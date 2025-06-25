@@ -8,6 +8,7 @@ import { wardrobeItemSchema, WardrobeItemFormData } from '../lib/validations';
 import { FilterCriteria } from '../lib/algorithms';
 import Card from '../components/Card';
 import Button from '../components/Button';
+import FormField from '../components/FormField';
 
 const AdvancedWardrobe: React.FC = () => {
   const navigate = useNavigate();
@@ -460,10 +461,7 @@ const AdvancedWardrobe: React.FC = () => {
             )}
             
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Item Name
-                </label>
+              <FormField label="Item Name" error={errors.name?.message} required>
                 <input
                   {...register('name')}
                   type="text"
@@ -472,15 +470,9 @@ const AdvancedWardrobe: React.FC = () => {
                   }`}
                   placeholder="e.g., Blue Denim Jacket"
                 />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-                )}
-              </div>
+              </FormField>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category
-                </label>
+              <FormField label="Category" error={errors.category?.message} required>
                 <select
                   {...register('category')}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 ${
@@ -491,15 +483,9 @@ const AdvancedWardrobe: React.FC = () => {
                     <option key={category} value={category}>{category}</option>
                   ))}
                 </select>
-                {errors.category && (
-                  <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
-                )}
-              </div>
+              </FormField>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Color
-                </label>
+              <FormField label="Color" error={errors.color?.message} required>
                 <input
                   {...register('color')}
                   type="text"
@@ -508,27 +494,18 @@ const AdvancedWardrobe: React.FC = () => {
                   }`}
                   placeholder="e.g., Navy Blue"
                 />
-                {errors.color && (
-                  <p className="mt-1 text-sm text-red-600">{errors.color.message}</p>
-                )}
-              </div>
+              </FormField>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Brand (Optional)
-                </label>
+              <FormField label="Brand" error={errors.brand?.message}>
                 <input
                   {...register('brand')}
                   type="text"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="e.g., Levi's"
                 />
-              </div>
+              </FormField>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Price (Optional)
-                </label>
+              <FormField label="Price" error={errors.price?.message}>
                 <input
                   {...register('price', { valueAsNumber: true })}
                   type="number"
@@ -538,15 +515,9 @@ const AdvancedWardrobe: React.FC = () => {
                   }`}
                   placeholder="0.00"
                 />
-                {errors.price && (
-                  <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>
-                )}
-              </div>
+              </FormField>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Image URL
-                </label>
+              <FormField label="Image URL" error={errors.image_url?.message} required>
                 <input
                   {...register('image_url')}
                   type="url"
@@ -555,10 +526,7 @@ const AdvancedWardrobe: React.FC = () => {
                   }`}
                   placeholder="https://example.com/image.jpg"
                 />
-                {errors.image_url && (
-                  <p className="mt-1 text-sm text-red-600">{errors.image_url.message}</p>
-                )}
-              </div>
+              </FormField>
 
               <div className="flex justify-end space-x-3 pt-4">
                 <Button

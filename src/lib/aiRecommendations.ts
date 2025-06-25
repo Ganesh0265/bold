@@ -32,6 +32,23 @@ export interface ShoppingSuggestion {
   styles: string[];
 }
 
+export interface OutfitRecommendation {
+  id: string;
+  name: string;
+  description: string;
+  items: {
+    name: string;
+    price: number;
+    store: string;
+    imageUrl: string;
+    link: string;
+  }[];
+  totalPrice: number;
+  occasion: string;
+  style: string;
+  confidence: number;
+}
+
 export class AIRecommendationEngine {
   private static styleDatabase = {
     'Minimalist': {
@@ -53,10 +70,15 @@ export class AIRecommendationEngine {
       colors: ['black', 'dark', 'metallic', 'bold'],
       patterns: ['geometric', 'abstract', 'bold'],
       silhouettes: ['fitted', 'asymmetric', 'structured']
+    },
+    'Romantic': {
+      colors: ['pink', 'cream', 'soft', 'pastel'],
+      patterns: ['floral', 'lace', 'delicate'],
+      silhouettes: ['flowing', 'feminine', 'soft']
     }
   };
 
-  // Sample shopping suggestions with real-looking product images
+  // Enhanced shopping suggestions with real-looking product images
   private static shoppingSuggestions = {
     'Tops': [
       {
@@ -88,6 +110,16 @@ export class AIRecommendationEngine {
         description: 'Elegant silk blouse for professional settings',
         colors: ['navy', 'black', 'white'],
         styles: ['professional', 'elegant', 'classic']
+      },
+      {
+        name: 'Striped Long Sleeve Tee',
+        price: 32.00,
+        store: 'Uniqlo',
+        imageUrl: 'https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=400',
+        link: '#',
+        description: 'Classic striped tee for casual styling',
+        colors: ['navy', 'white', 'red'],
+        styles: ['casual', 'classic', 'nautical']
       }
     ],
     'Bottoms': [
@@ -120,6 +152,16 @@ export class AIRecommendationEngine {
         description: 'Versatile pleated skirt for work and weekend',
         colors: ['navy', 'black', 'beige'],
         styles: ['feminine', 'classic', 'versatile']
+      },
+      {
+        name: 'Tailored Shorts',
+        price: 38.00,
+        store: 'COS',
+        imageUrl: 'https://images.pexels.com/photos/1488463/pexels-photo-1488463.jpeg?auto=compress&cs=tinysrgb&w=400',
+        link: '#',
+        description: 'Smart tailored shorts for summer',
+        colors: ['khaki', 'navy', 'white'],
+        styles: ['smart-casual', 'summer', 'tailored']
       }
     ],
     'Outerwear': [
@@ -142,6 +184,16 @@ export class AIRecommendationEngine {
         description: 'Classic denim jacket for casual styling',
         colors: ['blue', 'black', 'white'],
         styles: ['casual', 'classic', 'versatile']
+      },
+      {
+        name: 'Blazer',
+        price: 95.00,
+        store: 'Zara',
+        imageUrl: 'https://images.pexels.com/photos/1926769/pexels-photo-1926769.jpeg?auto=compress&cs=tinysrgb&w=400',
+        link: '#',
+        description: 'Structured blazer for professional looks',
+        colors: ['navy', 'black', 'gray'],
+        styles: ['professional', 'structured', 'classic']
       }
     ],
     'Shoes': [
@@ -164,6 +216,16 @@ export class AIRecommendationEngine {
         description: 'Clean white sneakers for casual outfits',
         colors: ['white', 'cream'],
         styles: ['casual', 'sporty', 'minimalist']
+      },
+      {
+        name: 'Pointed Toe Flats',
+        price: 68.00,
+        store: 'Everlane',
+        imageUrl: 'https://images.pexels.com/photos/1488463/pexels-photo-1488463.jpeg?auto=compress&cs=tinysrgb&w=400',
+        link: '#',
+        description: 'Elegant pointed flats for work and play',
+        colors: ['black', 'nude', 'navy'],
+        styles: ['professional', 'elegant', 'classic']
       }
     ],
     'Accessories': [
@@ -186,6 +248,16 @@ export class AIRecommendationEngine {
         description: 'Elegant silk scarf to elevate any outfit',
         colors: ['navy', 'cream', 'burgundy'],
         styles: ['elegant', 'classic', 'feminine']
+      },
+      {
+        name: 'Statement Necklace',
+        price: 45.00,
+        store: 'COS',
+        imageUrl: 'https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=400',
+        link: '#',
+        description: 'Bold statement necklace for special occasions',
+        colors: ['gold', 'silver', 'rose gold'],
+        styles: ['statement', 'elegant', 'bold']
       }
     ]
   };
@@ -228,6 +300,231 @@ export class AIRecommendationEngine {
       style: detectedStyle,
       occasion: this.suggestOccasion(baseItem, detectedStyle)
     };
+  }
+
+  // Generate complete outfit recommendations based on wardrobe
+  static generateOutfitRecommendations(wardrobeItems: any[]): OutfitRecommendation[] {
+    const recommendations: OutfitRecommendation[] = [];
+    
+    // Analyze user's style preferences
+    const userStyle = this.analyzeUserStyle(wardrobeItems);
+    
+    // Generate different types of outfit recommendations
+    const occasions = ['Professional', 'Casual', 'Date Night', 'Weekend', 'Travel'];
+    
+    occasions.forEach(occasion => {
+      const outfitRec = this.generateOutfitForOccasion(wardrobeItems, occasion, userStyle);
+      if (outfitRec) {
+        recommendations.push(outfitRec);
+      }
+    });
+
+    return recommendations.sort((a, b) => b.confidence - a.confidence);
+  }
+
+  private static generateOutfitForOccasion(
+    wardrobeItems: any[], 
+    occasion: string, 
+    userStyle: string
+  ): OutfitRecommendation | null {
+    const occasionMap = {
+      'Professional': {
+        requiredCategories: ['Tops', 'Bottoms', 'Shoes'],
+        optionalCategories: ['Outerwear', 'Accessories'],
+        style: 'Classic',
+        colors: ['navy', 'black', 'white', 'gray']
+      },
+      'Casual': {
+        requiredCategories: ['Tops', 'Bottoms'],
+        optionalCategories: ['Shoes', 'Outerwear'],
+        style: 'Minimalist',
+        colors: ['blue', 'white', 'gray', 'beige']
+      },
+      'Date Night': {
+        requiredCategories: ['Tops', 'Bottoms', 'Shoes'],
+        optionalCategories: ['Accessories'],
+        style: 'Romantic',
+        colors: ['black', 'navy', 'burgundy', 'emerald']
+      },
+      'Weekend': {
+        requiredCategories: ['Tops', 'Bottoms'],
+        optionalCategories: ['Shoes', 'Accessories'],
+        style: 'Casual',
+        colors: ['any']
+      },
+      'Travel': {
+        requiredCategories: ['Tops', 'Bottoms', 'Shoes'],
+        optionalCategories: ['Outerwear'],
+        style: 'Minimalist',
+        colors: ['versatile']
+      }
+    };
+
+    const config = occasionMap[occasion as keyof typeof occasionMap];
+    if (!config) return null;
+
+    // Find items for each required category
+    const outfitItems: any[] = [];
+    const shoppingItems: any[] = [];
+
+    config.requiredCategories.forEach(category => {
+      const categoryItems = wardrobeItems.filter(item => item.category === category);
+      
+      if (categoryItems.length > 0) {
+        // Pick the best matching item for this occasion
+        const bestItem = this.selectBestItemForOccasion(categoryItems, occasion, config.colors);
+        if (bestItem) {
+          outfitItems.push({
+            name: bestItem.name,
+            price: 0, // User's own item
+            store: 'Your Wardrobe',
+            imageUrl: bestItem.image_url,
+            link: '#'
+          });
+        }
+      } else {
+        // Suggest shopping items for missing categories
+        const suggestions = this.shoppingSuggestions[category as keyof typeof this.shoppingSuggestions] || [];
+        const bestSuggestion = suggestions.find(item => 
+          item.styles.includes(config.style.toLowerCase()) ||
+          config.colors.some(color => item.colors.includes(color))
+        ) || suggestions[0];
+        
+        if (bestSuggestion) {
+          shoppingItems.push(bestSuggestion);
+        }
+      }
+    });
+
+    // Add optional items if available
+    config.optionalCategories.forEach(category => {
+      const categoryItems = wardrobeItems.filter(item => item.category === category);
+      if (categoryItems.length > 0) {
+        const bestItem = this.selectBestItemForOccasion(categoryItems, occasion, config.colors);
+        if (bestItem && outfitItems.length < 4) {
+          outfitItems.push({
+            name: bestItem.name,
+            price: 0,
+            store: 'Your Wardrobe',
+            imageUrl: bestItem.image_url,
+            link: '#'
+          });
+        }
+      }
+    });
+
+    // Add shopping suggestions to complete the outfit
+    const allItems = [...outfitItems, ...shoppingItems];
+    const totalPrice = shoppingItems.reduce((sum, item) => sum + item.price, 0);
+
+    if (allItems.length < 2) return null; // Need at least 2 items for an outfit
+
+    return {
+      id: `outfit_${Date.now()}_${occasion}`,
+      name: `${occasion} Look`,
+      description: this.generateOutfitDescription(occasion, config.style, allItems.length),
+      items: allItems,
+      totalPrice,
+      occasion,
+      style: config.style,
+      confidence: this.calculateOutfitConfidence(outfitItems.length, allItems.length)
+    };
+  }
+
+  private static selectBestItemForOccasion(items: any[], occasion: string, preferredColors: string[]): any | null {
+    // Score items based on how well they fit the occasion
+    const scoredItems = items.map(item => {
+      let score = 0;
+      
+      // Color matching
+      if (preferredColors.includes('any') || preferredColors.includes('versatile')) {
+        score += 1;
+      } else {
+        const itemColor = item.color.toLowerCase();
+        if (preferredColors.some(color => itemColor.includes(color))) {
+          score += 2;
+        }
+      }
+      
+      // Wear count (prefer items that aren't overworn)
+      if (item.wear_count < 10) score += 1;
+      if (item.wear_count < 5) score += 1;
+      
+      // Tags matching
+      const occasionTags = occasion.toLowerCase().split(' ');
+      if (item.tags.some((tag: string) => 
+        occasionTags.some(occTag => tag.toLowerCase().includes(occTag))
+      )) {
+        score += 2;
+      }
+      
+      return { item, score };
+    });
+
+    const bestMatch = scoredItems.sort((a, b) => b.score - a.score)[0];
+    return bestMatch ? bestMatch.item : null;
+  }
+
+  private static analyzeUserStyle(wardrobeItems: any[]): string {
+    const styleScores: Record<string, number> = {};
+    
+    Object.keys(this.styleDatabase).forEach(style => {
+      styleScores[style] = 0;
+    });
+
+    wardrobeItems.forEach(item => {
+      const itemText = `${item.name} ${item.tags.join(' ')} ${item.color}`.toLowerCase();
+      
+      Object.entries(this.styleDatabase).forEach(([style, characteristics]) => {
+        // Check color matches
+        characteristics.colors.forEach(color => {
+          if (itemText.includes(color.toLowerCase())) {
+            styleScores[style] += 1;
+          }
+        });
+        
+        // Check pattern matches
+        characteristics.patterns.forEach(pattern => {
+          if (itemText.includes(pattern.toLowerCase())) {
+            styleScores[style] += 1;
+          }
+        });
+        
+        // Check silhouette matches
+        characteristics.silhouettes.forEach(silhouette => {
+          if (itemText.includes(silhouette.toLowerCase())) {
+            styleScores[style] += 1;
+          }
+        });
+      });
+    });
+
+    // Return the style with the highest score
+    const topStyle = Object.entries(styleScores).sort(([,a], [,b]) => b - a)[0];
+    return topStyle ? topStyle[0] : 'Classic';
+  }
+
+  private static generateOutfitDescription(occasion: string, style: string, itemCount: number): string {
+    const descriptions = {
+      'Professional': `A polished ${style.toLowerCase()} look perfect for the office and business meetings`,
+      'Casual': `An effortless ${style.toLowerCase()} ensemble for everyday comfort and style`,
+      'Date Night': `A sophisticated ${style.toLowerCase()} outfit that's perfect for romantic evenings`,
+      'Weekend': `A relaxed ${style.toLowerCase()} look ideal for weekend activities and leisure`,
+      'Travel': `A versatile ${style.toLowerCase()} outfit that's comfortable and stylish for any journey`
+    };
+
+    const baseDescription = descriptions[occasion as keyof typeof descriptions] || 
+                           `A stylish ${style.toLowerCase()} outfit for ${occasion.toLowerCase()}`;
+    
+    return `${baseDescription}. This ${itemCount}-piece ensemble combines comfort with style.`;
+  }
+
+  private static calculateOutfitConfidence(ownedItems: number, totalItems: number): number {
+    const completeness = ownedItems / totalItems;
+    const baseConfidence = 0.7;
+    const completenessBonus = completeness * 0.3;
+    
+    return Math.min(baseConfidence + completenessBonus, 0.95);
   }
 
   private static async extractDominantColorsOptimized(imageUrl: string): Promise<string[]> {
@@ -520,7 +817,8 @@ export class AIRecommendationEngine {
       'Minimalist': 'Professional, Casual, Everyday',
       'Bohemian': 'Casual, Creative, Weekend',
       'Classic': 'Professional, Formal, Versatile',
-      'Edgy': 'Night Out, Creative, Statement'
+      'Edgy': 'Night Out, Creative, Statement',
+      'Romantic': 'Date Night, Special Events, Feminine'
     };
     
     const baseOccasion = occasionMap[style as keyof typeof occasionMap] || 'Versatile';
